@@ -23,13 +23,19 @@ THIS APPLICATIONS PROVIDES THE FOLLOWING FEATURES:
 - Minimal UI, easy to customize
 ---------------------------------------------------------------------------------------------------------------------
 When logging in do NOT forget that each function follows the following:
+```bash
 @patient.pczc
 Grants you patient Access and Features
+```
+```bash
 @cashier.pczc
 Grants you Cashier Access and Features
+```
+```bash
 @nurse.pczc
 Grants you Nurse Access and Features
+```
 ---------------------------------------------------------------------------------------------------------------------
 Do NOT mistake it.
-And yes leave the doctor funcitons as it is, i made sure it shows NURSE instead of DOCTOR.
+- And yes leave the doctor funcitons as it is, i made sure it shows NURSE instead of DOCTOR.
 ---------------------------------------------------------------------------------------------------------------------
