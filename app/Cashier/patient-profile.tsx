@@ -1,15 +1,20 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
-  View, Text, TouchableOpacity,
-  StyleSheet, StatusBar, ScrollView, Alert
-} from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useState, useEffect } from 'react';
+  Alert,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const FALLBACK_DOCTORS = [
-  { id: 'd1', name: 'Nurse Santos', status: 'free' },
-  { id: 'd2', name: 'Nurse Reyes', status: 'free' },
-  { id: 'd3', name: 'Nurse Mendoza', status: 'busy' },
+  { id: "d1", name: "Nurse Santos", status: "free" },
+  { id: "d2", name: "Nurse Reyes", status: "free" },
+  { id: "d3", name: "Nurse Mendoza", status: "busy" },
 ];
 
 export default function PatientProfile() {
@@ -21,7 +26,9 @@ export default function PatientProfile() {
   const [doctors, setDoctors] = useState<any[]>([]);
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [visits, setVisits] = useState<any[]>([]);
-  const [currentStatus, setCurrentStatus] = useState(patient.status || 'waiting');
+  const [currentStatus, setCurrentStatus] = useState(
+    patient.status || "waiting",
+  );
 
   useEffect(() => {
     const loadData = async () => {
@@ -30,7 +37,7 @@ export default function PatientProfile() {
       if (vData) setVisits(JSON.parse(vData));
 
       // Load doctors — fallback to hardcoded if none in storage
-      const dData = await AsyncStorage.getItem('doctors');
+      const dData = await AsyncStorage.getItem("doctors");
       if (dData) {
         const saved = JSON.parse(dData);
         setDoctors(saved.length > 0 ? saved : FALLBACK_DOCTORS);
@@ -42,21 +49,28 @@ export default function PatientProfile() {
   }, []);
 
   // Helper: update patient in AsyncStorage and optionally clear window
-  const updatePatientStatus = async (newStatus: string, clearWindow = false) => {
-    const pData = await AsyncStorage.getItem('patients');
+  const updatePatientStatus = async (
+    newStatus: string,
+    clearWindow = false,
+  ) => {
+    const pData = await AsyncStorage.getItem("patients");
     const all: any[] = pData ? JSON.parse(pData) : [];
     const updated = all.map((p: any) =>
       p.id === patient.id
-        ? { ...p, status: newStatus, ...(selectedDoctor ? { assignedDoctor: selectedDoctor } : {}) }
-        : p
+        ? {
+            ...p,
+            status: newStatus,
+            ...(selectedDoctor ? { assignedDoctor: selectedDoctor } : {}),
+          }
+        : p,
     );
-    await AsyncStorage.setItem('patients', JSON.stringify(updated));
+    await AsyncStorage.setItem("patients", JSON.stringify(updated));
 
     if (clearWindow) {
-      const wData = await AsyncStorage.getItem('windows');
+      const wData = await AsyncStorage.getItem("windows");
       const windows = wData ? JSON.parse(wData) : [null, null, null];
       windows[windowIndex] = null;
-      await AsyncStorage.setItem('windows', JSON.stringify(windows));
+      await AsyncStorage.setItem("windows", JSON.stringify(windows));
     }
 
     setCurrentStatus(newStatus);
@@ -64,74 +78,80 @@ export default function PatientProfile() {
 
   const handleMarkPaid = async () => {
     if (!selectedDoctor) {
-      Alert.alert('Select a Doctor', 'Please select a free doctor before marking as paid.');
+      Alert.alert(
+        "Select a Doctor",
+        "Please select a free doctor before marking as paid.",
+      );
       return;
     }
-    await updatePatientStatus('paid', true);
+    await updatePatientStatus("paid", true);
     Alert.alert(
-      'Marked as Paid',
+      "Marked as Paid",
       `${patient.name} assigned to ${selectedDoctor.name}.`,
-      [{ text: 'OK', onPress: () => router.back() }]
+      [{ text: "OK", onPress: () => router.back() }],
     );
   };
 
   const handleMarkDone = () => {
-    Alert.alert('Mark as Done', `Mark ${patient.name} as fully served?`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert("Mark as Done", `Mark ${patient.name} as fully served?`, [
+      { text: "Cancel", style: "cancel" },
       {
-        text: 'Done', onPress: async () => {
-          const pData = await AsyncStorage.getItem('patients');
+        text: "Done",
+        onPress: async () => {
+          const pData = await AsyncStorage.getItem("patients");
           const all: any[] = pData ? JSON.parse(pData) : [];
           const updated = all.map((p: any) =>
-            p.id === patient.id ? { ...p, status: 'done' } : p
+            p.id === patient.id ? { ...p, status: "done" } : p,
           );
-          await AsyncStorage.setItem('patients', JSON.stringify(updated));
-          const wData = await AsyncStorage.getItem('windows');
+          await AsyncStorage.setItem("patients", JSON.stringify(updated));
+          const wData = await AsyncStorage.getItem("windows");
           const windows = wData ? JSON.parse(wData) : [null, null, null];
           windows[windowIndex] = null;
-          await AsyncStorage.setItem('windows', JSON.stringify(windows));
-          setCurrentStatus('done');
-          Alert.alert('Done', `${patient.name} has been marked as served.`, [
-            { text: 'OK', onPress: () => router.back() }
+          await AsyncStorage.setItem("windows", JSON.stringify(windows));
+          setCurrentStatus("done");
+          Alert.alert("Done", `${patient.name} has been marked as served.`, [
+            { text: "OK", onPress: () => router.back() },
           ]);
-        }
-      }
+        },
+      },
     ]);
   };
 
   const handleRemove = () => {
-    Alert.alert('Remove Patient', `Remove ${patient.name} from the queue?`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert("Remove Patient", `Remove ${patient.name} from the queue?`, [
+      { text: "Cancel", style: "cancel" },
       {
-        text: 'Remove', style: 'destructive', onPress: async () => {
-          const pData = await AsyncStorage.getItem('patients');
+        text: "Remove",
+        style: "destructive",
+        onPress: async () => {
+          const pData = await AsyncStorage.getItem("patients");
           const all: any[] = pData ? JSON.parse(pData) : [];
           const updated = all.map((p: any) =>
-            p.id === patient.id ? { ...p, status: 'done' } : p
+            p.id === patient.id ? { ...p, status: "done" } : p,
           );
-          await AsyncStorage.setItem('patients', JSON.stringify(updated));
-          const wData = await AsyncStorage.getItem('windows');
+          await AsyncStorage.setItem("patients", JSON.stringify(updated));
+          const wData = await AsyncStorage.getItem("windows");
           const windows = wData ? JSON.parse(wData) : [null, null, null];
           windows[windowIndex] = null;
-          await AsyncStorage.setItem('windows', JSON.stringify(windows));
+          await AsyncStorage.setItem("windows", JSON.stringify(windows));
           router.back();
-        }
-      }
+        },
+      },
     ]);
   };
 
   const statusColor: Record<string, string> = {
-    waiting: '#5B8DB8',
-    'with-doctor': '#9B59B6',
-    paid: '#2ECC71',
-    done: '#2ECC71',
+    waiting: "#5B8DB8",
+    "with-doctor": "#9B59B6",
+    paid: "#2ECC71",
+    done: "#2ECC71",
   };
 
   const statusLabel: Record<string, string> = {
-    waiting: '⏳ Waiting',
-    'with-doctor': '🩺 With Doctor',
-    paid: '💰 Paid',
-    done: '✓ Done',
+    waiting: "Waiting",
+    "with-doctor": "With Doctor",
+    paid: "Paid",
+    done: "Done",
   };
 
   return (
@@ -153,8 +173,21 @@ export default function PatientProfile() {
         <View style={styles.profileInfo}>
           <Text style={styles.patientName}>{patient.name}</Text>
           <Text style={styles.patientQueue}>Queue #{patient.queue}</Text>
-          <View style={[styles.statusPill, { backgroundColor: statusColor[currentStatus] + '22', borderColor: statusColor[currentStatus] }]}>
-            <Text style={[styles.statusPillText, { color: statusColor[currentStatus] }]}>
+          <View
+            style={[
+              styles.statusPill,
+              {
+                backgroundColor: statusColor[currentStatus] + "22",
+                borderColor: statusColor[currentStatus],
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.statusPillText,
+                { color: statusColor[currentStatus] },
+              ]}
+            >
               {statusLabel[currentStatus] ?? currentStatus}
             </Text>
           </View>
@@ -202,13 +235,15 @@ export default function PatientProfile() {
           <TouchableOpacity
             key={i}
             style={styles.visitCard}
-            onPress={() => router.push({
-              pathname: '/Nurse/print',
-              params: {
-                patient: JSON.stringify(patient),
-                visit: JSON.stringify(visit),
-              }
-            })}
+            onPress={() =>
+              router.push({
+                pathname: "/Nurse/print",
+                params: {
+                  patient: JSON.stringify(patient),
+                  visit: JSON.stringify(visit),
+                },
+              })
+            }
             activeOpacity={0.85}
           >
             <View style={styles.visitCardHeader}>
@@ -238,21 +273,33 @@ export default function PatientProfile() {
           key={doc.id}
           style={[
             styles.doctorRow,
-            doc.status === 'busy' && styles.doctorBusy,
+            doc.status === "busy" && styles.doctorBusy,
             selectedDoctor?.id === doc.id && styles.doctorSelected,
           ]}
           onPress={() => {
-            if (doc.status === 'busy') {
-              Alert.alert('Unavailable', `${doc.name} is currently busy.`);
+            if (doc.status === "busy") {
+              Alert.alert("Unavailable", `${doc.name} is currently busy.`);
               return;
             }
             setSelectedDoctor(selectedDoctor?.id === doc.id ? null : doc);
           }}
           activeOpacity={0.85}
         >
-          <View style={[styles.statusLight, { backgroundColor: doc.status === 'free' ? '#2ECC71' : '#E74C3C' }]} />
+          <View
+            style={[
+              styles.statusLight,
+              {
+                backgroundColor: doc.status === "free" ? "#2ECC71" : "#E74C3C",
+              },
+            ]}
+          />
           <Text style={styles.doctorName}>{doc.name}</Text>
-          <Text style={[styles.doctorStatus, { color: doc.status === 'free' ? '#2ECC71' : '#E74C3C' }]}>
+          <Text
+            style={[
+              styles.doctorStatus,
+              { color: doc.status === "free" ? "#2ECC71" : "#E74C3C" },
+            ]}
+          >
             {doc.status.toUpperCase()}
           </Text>
           {selectedDoctor?.id === doc.id && (
@@ -265,85 +312,151 @@ export default function PatientProfile() {
 
       {/* MARK PAID BUTTON */}
       <TouchableOpacity
-        style={[styles.paidButton, !selectedDoctor && styles.paidButtonDisabled]}
+        style={[
+          styles.paidButton,
+          !selectedDoctor && styles.paidButtonDisabled,
+        ]}
         onPress={handleMarkPaid}
         activeOpacity={0.85}
         disabled={!selectedDoctor}
       >
         <Text style={styles.paidButtonText}>
           {selectedDoctor
-            ? `💰 Mark as Paid & Send to ${selectedDoctor.name}`
-            : '💰 Mark as Paid & Send to Doctor'}
+            ? `Mark as Paid & Send to ${selectedDoctor.name}`
+            : "Mark as Paid & Send to Doctor"}
         </Text>
       </TouchableOpacity>
-
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A1931' },
+  container: { flex: 1, backgroundColor: "#0A1931" },
   content: { padding: 24, paddingTop: 52, paddingBottom: 40 },
 
-  backButton: { alignSelf: 'flex-start', marginBottom: 20 },
-  backText: { color: '#5B8DB8', fontSize: 15, fontWeight: '600' },
+  backButton: { alignSelf: "flex-start", marginBottom: 20 },
+  backText: { color: "#5B8DB8", fontSize: 15, fontWeight: "600" },
 
   profileHeader: {
-    flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    marginBottom: 8,
   },
   avatar: {
-    width: 64, height: 64, borderRadius: 32,
-    backgroundColor: '#2471A3', alignItems: 'center', justifyContent: 'center',
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#2471A3",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  avatarText: { fontSize: 28, fontWeight: '700', color: '#FFFFFF' },
+  avatarText: { fontSize: 28, fontWeight: "700", color: "#FFFFFF" },
   profileInfo: { flex: 1, gap: 4 },
-  patientName: { fontSize: 22, fontWeight: '700', color: '#FFFFFF' },
-  patientQueue: { fontSize: 13, color: '#5B8DB8' },
+  patientName: { fontSize: 22, fontWeight: "700", color: "#FFFFFF" },
+  patientQueue: { fontSize: 13, color: "#5B8DB8" },
   statusPill: {
-    alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4,
-    borderRadius: 12, borderWidth: 1, marginTop: 4,
+    alignSelf: "flex-start",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 4,
   },
-  statusPillText: { fontSize: 12, fontWeight: '700' },
+  statusPillText: { fontSize: 12, fontWeight: "700" },
 
-  divider: { height: 1, backgroundColor: '#1E3A5F', marginVertical: 20 },
-  sectionRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 8 },
-  sectionDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#3498DB' },
-  sectionLabel: { fontSize: 11, letterSpacing: 2.5, color: '#5B8DB8', fontWeight: '600' },
+  divider: { height: 1, backgroundColor: "#1E3A5F", marginVertical: 20 },
+  sectionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    gap: 8,
+  },
+  sectionDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#3498DB",
+  },
+  sectionLabel: {
+    fontSize: 11,
+    letterSpacing: 2.5,
+    color: "#5B8DB8",
+    fontWeight: "600",
+  },
 
   // Quick actions
-  quickActions: { flexDirection: 'row', gap: 10 },
-  quickBtn: { flex: 1, borderRadius: 10, paddingVertical: 13, alignItems: 'center' },
-  quickBtnDone: { backgroundColor: '#2471A3' },
-  quickBtnRemove: { backgroundColor: 'transparent', borderWidth: 1, borderColor: '#E74C3C' },
-  quickBtnText: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
+  quickActions: { flexDirection: "row", gap: 10 },
+  quickBtn: {
+    flex: 1,
+    borderRadius: 10,
+    paddingVertical: 13,
+    alignItems: "center",
+  },
+  quickBtnDone: { backgroundColor: "#2471A3" },
+  quickBtnRemove: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#E74C3C",
+  },
+  quickBtnText: { color: "#FFFFFF", fontSize: 14, fontWeight: "700" },
 
   // Visits
   visitCard: {
-    backgroundColor: '#0F2744', borderRadius: 10,
-    padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#1E3A5F',
+    backgroundColor: "#0F2744",
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "#1E3A5F",
   },
-  visitCardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  visitDate: { fontSize: 12, color: '#5B8DB8', fontWeight: '600' },
-  visitPrint: { fontSize: 12, color: '#2471A3', fontWeight: '600' },
-  visitDetail: { fontSize: 13, color: '#AED6F1', marginBottom: 2 },
-  emptyText: { fontSize: 13, color: '#2E4F6E', fontStyle: 'italic', marginBottom: 8 },
+  visitCardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+  visitDate: { fontSize: 12, color: "#5B8DB8", fontWeight: "600" },
+  visitPrint: { fontSize: 12, color: "#2471A3", fontWeight: "600" },
+  visitDetail: { fontSize: 13, color: "#AED6F1", marginBottom: 2 },
+  emptyText: {
+    fontSize: 13,
+    color: "#2E4F6E",
+    fontStyle: "italic",
+    marginBottom: 8,
+  },
 
   // Doctors
   doctorRow: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#0F2744', borderRadius: 10,
-    padding: 14, marginBottom: 8, gap: 12,
-    borderWidth: 1, borderColor: '#1E3A5F',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#0F2744",
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 8,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "#1E3A5F",
   },
   doctorBusy: { opacity: 0.45 },
-  doctorSelected: { borderColor: '#2471A3', borderWidth: 2 },
+  doctorSelected: { borderColor: "#2471A3", borderWidth: 2 },
   statusLight: { width: 10, height: 10, borderRadius: 5 },
-  doctorName: { fontSize: 15, color: '#FFFFFF', flex: 1, fontWeight: '600' },
-  doctorStatus: { fontSize: 11, fontWeight: '700', letterSpacing: 1 },
-  selectedCheck: { color: '#2471A3', fontSize: 18, fontWeight: '700' },
+  doctorName: { fontSize: 15, color: "#FFFFFF", flex: 1, fontWeight: "600" },
+  doctorStatus: { fontSize: 11, fontWeight: "700", letterSpacing: 1 },
+  selectedCheck: { color: "#2471A3", fontSize: 18, fontWeight: "700" },
 
   // Pay button
-  paidButton: { backgroundColor: '#1E8449', borderRadius: 10, paddingVertical: 16, alignItems: 'center' },
-  paidButtonDisabled: { backgroundColor: '#1E3A5F' },
-  paidButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700', textAlign: 'center', paddingHorizontal: 8 },
+  paidButton: {
+    backgroundColor: "#1E8449",
+    borderRadius: 10,
+    paddingVertical: 16,
+    alignItems: "center",
+  },
+  paidButtonDisabled: { backgroundColor: "#1E3A5F" },
+  paidButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "700",
+    textAlign: "center",
+    paddingHorizontal: 8,
+  },
 });
