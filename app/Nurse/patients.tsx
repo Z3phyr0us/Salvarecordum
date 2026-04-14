@@ -54,11 +54,11 @@ export default function DoctorPatients() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <StatusBar barStyle="light-content" backgroundColor="#0A1931" />
 
-      {/* HEADER */}
+      {/*HEADER*/}
       <Text style={styles.headerSub}>SALVARECORDUM</Text>
       <Text style={styles.headerTitle}>Nurse Dashboard</Text>
 
-      {/* DOCTOR STATUS CARD */}
+      {/*DOCTOR STATUS CARD*/}
       <View style={styles.statusCard}>
         <View style={styles.statusCardLeft}>
           <View style={[
@@ -91,7 +91,7 @@ export default function DoctorPatients() {
 
       <View style={styles.divider} />
 
-      {/* ASSIGNED / INCOMING */}
+      {/*ASSIGNED / INCOMING*/}
       <View style={styles.sectionRow}>
         <View style={styles.sectionDot} />
         <Text style={styles.sectionLabel}>
@@ -110,7 +110,7 @@ export default function DoctorPatients() {
             <TouchableOpacity
               style={styles.patientCard}
               onPress={() => router.push({
-                pathname: '/Doctor/case',
+                pathname: '/Nurse/case',
                 params: { patient: JSON.stringify(item) }
               })}
               activeOpacity={0.85}
@@ -134,7 +134,7 @@ export default function DoctorPatients() {
 
       <View style={styles.divider} />
 
-      {/* DONE PATIENTS */}
+      {/*DONE PATIENTS*/}
       <View style={styles.sectionRow}>
         <View style={styles.sectionDot} />
         <Text style={styles.sectionLabel}>

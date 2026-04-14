@@ -31,7 +31,7 @@ export default function LoginScreen() {
     } else if (email.endsWith('@cashier.slvdm')) {
       router.replace('/Cashier/dashboard');
     } else if (email.endsWith('@nurse.slvdm')) {
-      router.replace('/Doctor/patients');
+      router.replace('/Nurse/patients');
     } else {
       setError('Unrecognized email domain. Please use a valid @slvdm account.');
     }

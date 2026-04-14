@@ -9,25 +9,25 @@ export default function HomeScreen() {
   const [windows, setWindows] = useState<any[]>([null, null, null]);
   const [patients, setPatients] = useState<any[]>([]);
 
-  const loadWindows = async () => {
-    const data = await AsyncStorage.getItem('windows');
-    if (data) setWindows(JSON.parse(data));
-    else setWindows([null, null, null]);
-  };
-
   const loadPatients = async () => {
     const data = await AsyncStorage.getItem('patients');
     if (data) {
       const allPatients = JSON.parse(data);
-      setPatients(allPatients);
-      // Assign first 3 patients to windows
+
+      // Filter out done patients and re-number queue
+      const active = allPatients
+        .filter((p: any) => p.status !== 'done')
+        .map((p: any, i: number) => ({ ...p, queue: i + 1 }));
+
+      setPatients(active);
+
+      // Assign first 3 active patients to windows
       const windowsData = [
-        allPatients[0] || null,
-        allPatients[1] || null,
-        allPatients[2] || null,
+        active[0] || null,
+        active[1] || null,
+        active[2] || null,
       ];
       setWindows(windowsData);
-      // Persist windows to AsyncStorage so Cashier can see them
       await AsyncStorage.setItem('windows', JSON.stringify(windowsData));
     } else {
       setPatients([]);
@@ -37,7 +37,6 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      loadWindows();
       loadPatients();
     }, [])
   );

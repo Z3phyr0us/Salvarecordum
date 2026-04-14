@@ -18,7 +18,12 @@ export default function PatientListScreen() {
   const loadPatients = async () => {
     const data = await AsyncStorage.getItem('patients');
     if (data) {
-      setPatients(JSON.parse(data));
+      const all = JSON.parse(data);
+      // Only show active patients, re-numbered
+      const active = all
+        .filter((p: any) => p.status !== 'done')
+        .map((p: any, i: number) => ({ ...p, queue: i + 1 }));
+      setPatients(active);
     }
   };
 
@@ -28,9 +33,13 @@ export default function PatientListScreen() {
       return;
     }
 
+    // Load full list (including done) so we don't overwrite history
+    const data = await AsyncStorage.getItem('patients');
+    const all = data ? JSON.parse(data) : [];
+
     const newPatient = {
       id: Date.now().toString(),
-      name: name,
+      name: name.trim(),
       queue: patients.length + 1,
       status: 'waiting',
       diagnosis: '',
@@ -38,11 +47,10 @@ export default function PatientListScreen() {
       notes: ''
     };
 
-    const updated = [...patients, newPatient];
-    await AsyncStorage.setItem('patients', JSON.stringify(updated));
-    setPatients(updated);
+    await AsyncStorage.setItem('patients', JSON.stringify([...all, newPatient]));
+    setPatients(prev => [...prev, newPatient]);
     setName('');
-    Alert.alert('Success', `${name} added to queue #${newPatient.queue}`);
+    Alert.alert('Success', `${name.trim()} added to queue #${newPatient.queue}`);
   };
 
   const deletePatient = async (id: string, patientName: string) => {
@@ -55,13 +63,18 @@ export default function PatientListScreen() {
           text: 'Remove',
           style: 'destructive',
           onPress: async () => {
-            const filtered = patients.filter(p => p.id !== id);
-            const updated = filtered.map((p, index) => ({
-              ...p,
-              queue: index + 1
-            }));
+            // Load full list and mark as done instead of hard-deleting
+            const data = await AsyncStorage.getItem('patients');
+            const all = data ? JSON.parse(data) : [];
+            const updated = all.map((p: any) =>
+              p.id === id ? { ...p, status: 'done' } : p
+            );
             await AsyncStorage.setItem('patients', JSON.stringify(updated));
-            setPatients(updated);
+            // Re-filter and re-number displayed list
+            const active = updated
+              .filter((p: any) => p.status !== 'done')
+              .map((p: any, i: number) => ({ ...p, queue: i + 1 }));
+            setPatients(active);
           }
         }
       ]

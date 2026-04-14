@@ -13,12 +13,12 @@ export default function PrintScreen() {
 
   const handlePrint = () => {
     Alert.alert('Print', 'Document sent to printer', [
-      { text: 'OK', onPress: () => router.replace('/Doctor/patients') }
+      { text: 'OK', onPress: () => router.replace('/Nurse/patients') }
     ]);
   };
 
   const handleDone = () => {
-    router.replace('/Doctor/patients');
+    router.replace('/Nurse/patients');
   };
 
   return (
